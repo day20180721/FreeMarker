@@ -26,7 +26,7 @@ public class StringUtil {
         String result = string;
         for (Character c : allUpperCaseLetter) {
             char lowerCase = Character.toLowerCase(c);
-            result = string.replaceAll(c + "", "_" + lowerCase);
+            result = result.replaceAll(c + "", "_" + lowerCase);
         }
         return result;
     }

@@ -23,7 +23,7 @@ public class ExcelController {
 
     @ResponseBody
     @GetMapping("/properties")
-    public String fromJavaPropertiesAndDatabaseTable(String properties, String databaseTable) throws TemplateException, IOException {
+    public String fromExcelPropertiesAndDatabaseTable(String properties, String databaseTable) throws TemplateException, IOException {
         String insert = excelInsertService.insertByExcel(properties, databaseTable);
         String update = excelUpdateService.updateByExcel(properties, databaseTable);
         return insert + "\n\n" + update;

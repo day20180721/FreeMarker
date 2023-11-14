@@ -1,6 +1,7 @@
 package com.littlejenny.freemaker.controller;
 
-import com.littlejenny.freemaker.service.JDBCService;
+import com.littlejenny.freemaker.service.InsertService;
+import com.littlejenny.freemaker.service.UpdateService;
 import freemarker.template.TemplateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,12 +15,23 @@ import java.io.IOException;
 @RequestMapping("/jdbc")
 public class JDBCController {
     @Autowired
-    JDBCService jdbcService;
+    InsertService insertService;
+    @Autowired
+    UpdateService updateService;
 
     @ResponseBody
-    @GetMapping("/from/properties")
-    public String fromPropertiesAndDatabaseTable(String properties,String databaseTable) throws TemplateException, IOException {
+    @GetMapping("/from/java/properties")
+    public String fromJavaPropertiesAndDatabaseTable(String properties, String databaseTable) throws TemplateException, IOException {
+        String insert = insertService.insertByClassProperty(properties, databaseTable);
+        String update = updateService.updateByClassProperty(properties, databaseTable);
+        return insert + "\n\n" + update;
+    }
 
-        return jdbcService.fromPropertiesAndDatabaseTable(properties,databaseTable);
+    @ResponseBody
+    @GetMapping("/from/java/class")
+    public String fromJavaClassAndDatabaseTable(String clazz, String databaseTable) throws TemplateException, IOException, ClassNotFoundException {
+        String insert = insertService.insertByClassPath(clazz, databaseTable);
+        String update = updateService.updateByClassPath(clazz, databaseTable);
+        return insert + "\n\n" + update;
     }
 }

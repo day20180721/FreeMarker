@@ -1,7 +1,7 @@
 package com.littlejenny.freemaker.service.impl;
 
 import com.littlejenny.freemaker.model.Update;
-import com.littlejenny.freemaker.service.UpdateService;
+import com.littlejenny.freemaker.service.JavaUpdateService;
 import com.littlejenny.freemaker.util.StringUtil;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -16,12 +16,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class UpdateServiceImpl implements UpdateService {
+public class JavaUpdateServiceImpl implements JavaUpdateService {
     @Autowired
     Configuration freeMarkerConfiguration;
 
     @Override
     public String updateByClassProperty(String properties, String databaseTable) throws IOException, TemplateException {
+        //private Timestamp workDate
         List<String> propertyList = getPropertyListFromRawString(properties);
         return update(propertyList, databaseTable);
     }
@@ -45,6 +46,7 @@ public class UpdateServiceImpl implements UpdateService {
 
     @Override
     public String updateByClassPath(String classPath, String databaseTable) throws IOException, TemplateException, ClassNotFoundException {
+        //workDate
         Class<?> clazz = Class.forName(classPath);
         List<String> propertyListFromClass = getPropertyListFromClass(clazz);
         return update(propertyListFromClass, databaseTable);
@@ -61,10 +63,10 @@ public class UpdateServiceImpl implements UpdateService {
 
     private String update(List<String> propertyList, String databaseTable) throws IOException, TemplateException {
         Template template = freeMarkerConfiguration.getTemplate("update.ftlh");
+        //work_date = :workDate
+        String rowString = getRowString(propertyList);
 
-        String columnListString = getColumnListString(propertyList);
-
-        Update update = new Update(columnListString, databaseTable);
+        Update update = new Update(rowString, databaseTable);
 
         String result = "";
 
@@ -77,7 +79,7 @@ public class UpdateServiceImpl implements UpdateService {
         return result;
     }
 
-    private String getColumnListString(List<String> propertyList) {
+    private String getRowString(List<String> propertyList) {
         StringBuilder stringBuilder = new StringBuilder();
         for (String s : propertyList) {
             String underLineLowerCase = StringUtil.toUnderLineLowerCase(s);

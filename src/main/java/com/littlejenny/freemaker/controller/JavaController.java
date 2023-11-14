@@ -1,7 +1,7 @@
 package com.littlejenny.freemaker.controller;
 
-import com.littlejenny.freemaker.service.InsertService;
-import com.littlejenny.freemaker.service.UpdateService;
+import com.littlejenny.freemaker.service.JavaInsertService;
+import com.littlejenny.freemaker.service.JavaUpdateService;
 import freemarker.template.TemplateException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,26 +12,26 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/jdbc")
-public class JDBCController {
+@RequestMapping("/jdbc/from/java")
+public class JavaController {
     @Autowired
-    InsertService insertService;
+    JavaInsertService javaInsertService;
     @Autowired
-    UpdateService updateService;
+    JavaUpdateService javaUpdateService;
 
     @ResponseBody
-    @GetMapping("/from/java/properties")
+    @GetMapping("/properties")
     public String fromJavaPropertiesAndDatabaseTable(String properties, String databaseTable) throws TemplateException, IOException {
-        String insert = insertService.insertByClassProperty(properties, databaseTable);
-        String update = updateService.updateByClassProperty(properties, databaseTable);
+        String insert = javaInsertService.insertByClassProperty(properties, databaseTable);
+        String update = javaUpdateService.updateByClassProperty(properties, databaseTable);
         return insert + "\n\n" + update;
     }
 
     @ResponseBody
-    @GetMapping("/from/java/class")
+    @GetMapping("/class")
     public String fromJavaClassAndDatabaseTable(String clazz, String databaseTable) throws TemplateException, IOException, ClassNotFoundException {
-        String insert = insertService.insertByClassPath(clazz, databaseTable);
-        String update = updateService.updateByClassPath(clazz, databaseTable);
+        String insert = javaInsertService.insertByClassPath(clazz, databaseTable);
+        String update = javaUpdateService.updateByClassPath(clazz, databaseTable);
         return insert + "\n\n" + update;
     }
 }

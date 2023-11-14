@@ -4,7 +4,7 @@ import freemarker.template.TemplateException;
 
 import java.io.IOException;
 
-public interface UpdateService {
+public interface JavaUpdateService {
     String updateByClassProperty(String properties, String databaseTable) throws IOException, TemplateException;
     String updateByClassPath(String classPath, String databaseTable) throws IOException, TemplateException, ClassNotFoundException;
 }

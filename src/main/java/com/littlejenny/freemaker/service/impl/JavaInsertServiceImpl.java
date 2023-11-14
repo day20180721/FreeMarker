@@ -1,7 +1,7 @@
 package com.littlejenny.freemaker.service.impl;
 
 import com.littlejenny.freemaker.model.Insert;
-import com.littlejenny.freemaker.service.InsertService;
+import com.littlejenny.freemaker.service.JavaInsertService;
 import com.littlejenny.freemaker.util.StringUtil;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -13,18 +13,17 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class InsertServiceImpl implements InsertService {
+public class JavaInsertServiceImpl implements JavaInsertService {
     @Autowired
     Configuration freeMarkerConfiguration;
 
     @Override
     public String insertByClassProperty(String properties, String databaseTable) throws IOException, TemplateException {
+        //private Timestamp workDate
         List<String> propertyList = getPropertyListFromRawString(properties);
         return insert(propertyList, databaseTable);
     }
@@ -49,9 +48,12 @@ public class InsertServiceImpl implements InsertService {
     @Override
     public String insertByClassPath(String classPath, String databaseTable) throws IOException, TemplateException, ClassNotFoundException {
         Class<?> clazz = Class.forName(classPath);
+        //workDate
         List<String> propertyListFromClass = getPropertyListFromClass(clazz);
         return insert(propertyListFromClass, databaseTable);
     }
+
+
 
     private List<String> getPropertyListFromClass(Class<?> clazz) {
         List<String> propertyList = new ArrayList<>();
@@ -64,15 +66,16 @@ public class InsertServiceImpl implements InsertService {
 
     private String insert(List<String> propertyList, String databaseTable) throws IOException, TemplateException {
         Template template = freeMarkerConfiguration.getTemplate("insert.ftlh");
-
-        List<String> propertyListWithColon = getPropertyListWithColon(propertyList);
-
+        //workDate -> :workDate
+        List<String> colonPropertyList = getColonPropertyList(propertyList);
+        //workDate -> work_date
         List<String> underLineLowerCasePropertyList = getUnderLineLowerCasePropertyList(propertyList);
+        //work_date
+        String underLineLowerCaseString = getUnderLineLowerCaseString(underLineLowerCasePropertyList);
+        //:workDate
+        String ColonString = getColonString(colonPropertyList);
 
-        String propertyListString = getPropertyListString(underLineLowerCasePropertyList);
-        String propertyListWithColonString = getPropertyListWithColonString(propertyListWithColon);
-
-        Insert insert = new Insert(propertyListString, propertyListWithColonString, databaseTable);
+        Insert insert = new Insert(underLineLowerCaseString, ColonString, databaseTable);
 
         String result = "";
 
@@ -85,7 +88,7 @@ public class InsertServiceImpl implements InsertService {
         return result;
     }
 
-    private List<String> getPropertyListWithColon(List<String> propertyList) {
+    private List<String> getColonPropertyList(List<String> propertyList) {
         return propertyList.stream().map(item -> {
             return ":" + item;
         }).collect(Collectors.toList());
@@ -99,12 +102,12 @@ public class InsertServiceImpl implements InsertService {
         return list;
     }
 
-    private String getPropertyListString(List<String> propertyList) {
+    private String getUnderLineLowerCaseString(List<String> propertyList) {
         String result = propertyList.toString();
         return result.substring(1, result.length() - 1);
     }
 
-    private String getPropertyListWithColonString(List<String> propertyListWithColon) {
+    private String getColonString(List<String> propertyListWithColon) {
         String result = propertyListWithColon.toString();
         return result.substring(1, result.length() - 1);
     }

@@ -1,34 +1,18 @@
-WORK_DATE
-PX_SEQ_NO
-ITEM_NO
-STORE_NBR
-PX_PROM_LEVEL
-PX_PROM_NO
-PX_PROM_DESCR
-SELL_BEGIN_DATE
-SELL_END_DATE
-ACTIVE_SELL_PRICE
-SELL_PRICE2
-NORMAL_SELL_PRICE
-PROMOTION_NO
-PROM_TYPE
-PROM_LEVEL
-BONUS_POINT
-BLOCK
-LIMIT_QTY
-PROM_TXT
-MEMO
-RULE_TYPE
-ACTION_NO
-MODULE_CODE
-MODULE_RULE_TYPE
-MODULE_RULE_VALUE
-DISC_ACTION_NO
-DISC_RULE_TYPE
-DISC_RULE_VALUE
-STORE_CONST_QTY
-CUST_CONST_QTY
-DAY_LIMIT_TYPE
-UPD_TIME
-STATUS
-ERR_MSG
+r_day_limit_type[i]        = 0    ;
+         r_px_prom_level[i]        = 0    ;
+         r_prom_level[i]        = 0    ;
+         r_block[i]        = 0    ;
+         r_item_no[i]        = 0    ;
+         r_active_sell_price[i]        = 0    ;
+         r_sell_price2[i]        = 0    ;
+         r_promotion_no[i]        = 0    ;
+         r_bonus_point[i]        = 0    ;
+         r_limit_qty[i]        = 0    ;
+         r_action_no[i]        = 0    ;
+         r_module_code[i]        = 0    ;
+         r_module_rule_value[i]        = 0    ;
+         r_disc_action_no[i]        = 0    ;
+         r_disc_rule_value[i]        = 0    ;
+         r_store_const_qty[i]        = 0    ;
+         r_cust_const_qty[i]        = 0    ;
+         r_normal_sell_price[i]        = 0    ;

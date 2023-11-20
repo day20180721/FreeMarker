@@ -127,4 +127,13 @@ public class StringUtil {
         }
         return stringBuilder.toString();
     }
+    public static Integer upperCaseCount(String string){
+        Integer count = 0;
+        for (char c : string.toCharArray()) {
+            if(Character.isUpperCase(c)){
+                count++;
+            }
+        }
+        return count;
+    }
 }

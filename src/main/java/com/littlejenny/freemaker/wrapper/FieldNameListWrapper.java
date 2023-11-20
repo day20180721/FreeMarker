@@ -61,7 +61,15 @@ public class FieldNameListWrapper {
     }
 
     public FieldNameListWrapper concat(List<String> list, String concator) {
-        fieldNameList = StringUtil.concat(fieldNameList,list,concator);
+        fieldNameList = StringUtil.concat(fieldNameList, list, concator);
+        return this;
+    }
+
+    public FieldNameListWrapper expand() {
+        Integer longestLength = StringUtil.longestLength(fieldNameList);
+        fieldNameList = fieldNameList.stream().map(item -> {
+            return StringUtil.fillSyntaxUntil(item, longestLength, ' ');
+        }).collect(Collectors.toList());
         return this;
     }
 }

@@ -1,4 +1,4 @@
-package com.littlejenny.freemaker.model.java.jdbc;
+package com.littlejenny.freemaker.model.freemarker.jdbc.java;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class JavaJDBCMapSqlParameterSource {
-    private String fieldNameCamel;
-    private String fieldNameNotCamel;
-    private Boolean nullable;
+    private String fieldNameLowerCamel;
+    private String fieldNameLowerNotCamel;
 }

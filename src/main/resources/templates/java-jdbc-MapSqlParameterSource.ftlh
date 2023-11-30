@@ -1,13 +1,7 @@
-private MapSqlParameterSource getInsertMapSqlParameterSource(${parentName} ${parentName?uncap_first}) {
+private MapSqlParameterSource getInsertMapSqlParameterSource(${marker.insertedObjectName?cap_first} ${marker.insertedObjectName?uncap_first}) {
     MapSqlParameterSource map = new MapSqlParameterSource();
-<#list itemList as item>
-    <#if item.nullable>
-        if (${parentName?uncap_first}.get${item.fieldNameCamel?cap_first}() != null){
-            map.addValue("${item.fieldNameNotCamel}", ${parentName?uncap_first}.get${item.fieldNameCamel?cap_first}());
-        }
-    <#else>
-            map.addValue("${item.fieldNameNotCamel}", ${parentName?uncap_first}.get${item.fieldNameCamel?cap_first}());
-    </#if>
+<#list marker.paramList as param>
+    map.addValue("${param.fieldNameLowerNotCamel}", ${marker.insertedObjectName?uncap_first}.get${param.fieldNameLowerCamel?cap_first}());
 </#list>
     return map;
 }

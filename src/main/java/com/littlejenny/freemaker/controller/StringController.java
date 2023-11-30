@@ -11,12 +11,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class StringController {
     @ResponseBody
     @GetMapping("/toNotCamel")
-    public String toUnderLineLowerCase(String msg){
+    public String toNotCamel(String msg){
         return StringUtil.toNotCamel(msg);
     }
     @ResponseBody
     @GetMapping("/toCamel")
-    public String toUppercase(String msg){
+    public String toCamel(String msg){
         return StringUtil.toCamel(msg);
+    }
+    @ResponseBody
+    @GetMapping("/toUpper")
+    public String toUpper(String msg){
+        return msg.toUpperCase();
+    }
+    @ResponseBody
+    @GetMapping("/toLower")
+    public String toLower(String msg){
+        return msg.toLowerCase();
     }
 }

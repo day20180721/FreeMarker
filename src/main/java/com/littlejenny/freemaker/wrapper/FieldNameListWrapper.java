@@ -3,7 +3,6 @@ package com.littlejenny.freemaker.wrapper;
 import com.littlejenny.freemaker.util.StringUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,10 +11,15 @@ import java.util.stream.Collectors;
  * @created date 2023/11/17
  */
 public class FieldNameListWrapper {
-    private List<String> fieldNameList = new ArrayList<>();
+    private List<String> fieldNameList;
 
-    public FieldNameListWrapper(List<String> fieldNameList) {
-        this.fieldNameList = fieldNameList.stream().collect(Collectors.toList());
+    private FieldNameListWrapper(List<String> fieldNameList) {
+        this.fieldNameList = fieldNameList;
+    }
+
+    public static FieldNameListWrapper of(List<String> fieldNameList) {
+        ArrayList<String> copy = new ArrayList<>(fieldNameList);
+        return new FieldNameListWrapper(copy);
     }
 
     public FieldNameListWrapper toNotCamel() {
@@ -57,7 +61,7 @@ public class FieldNameListWrapper {
     }
 
     public List<String> build() {
-        return fieldNameList;
+        return new ArrayList<>(fieldNameList);
     }
 
     public FieldNameListWrapper concat(List<String> list, String concator) {
@@ -68,7 +72,20 @@ public class FieldNameListWrapper {
     public FieldNameListWrapper expand() {
         Integer longestLength = StringUtil.longestLength(fieldNameList);
         fieldNameList = fieldNameList.stream().map(item -> {
-            return StringUtil.fillSyntaxUntil(item, longestLength, ' ');
+            return StringUtil.fillAfterSyntaxUntil(item, longestLength, ' ');
+        }).collect(Collectors.toList());
+        return this;
+    }
+
+    public FieldNameListWrapper expandBefore(Integer length) {
+        StringBuilder expanded = new StringBuilder();
+        for (Integer i = 0; i < length; i++) {
+            expanded.append(' ');
+        }
+        String expandedString = expanded.toString();
+
+        fieldNameList = fieldNameList.stream().map(item -> {
+            return expandedString + item;
         }).collect(Collectors.toList());
         return this;
     }

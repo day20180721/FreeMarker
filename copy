@@ -1,18 +1,492 @@
-r_day_limit_type[i]        = 0    ;
-         r_px_prom_level[i]        = 0    ;
-         r_prom_level[i]        = 0    ;
-         r_block[i]        = 0    ;
-         r_item_no[i]        = 0    ;
-         r_active_sell_price[i]        = 0    ;
-         r_sell_price2[i]        = 0    ;
-         r_promotion_no[i]        = 0    ;
-         r_bonus_point[i]        = 0    ;
-         r_limit_qty[i]        = 0    ;
-         r_action_no[i]        = 0    ;
-         r_module_code[i]        = 0    ;
-         r_module_rule_value[i]        = 0    ;
-         r_disc_action_no[i]        = 0    ;
-         r_disc_rule_value[i]        = 0    ;
-         r_store_const_qty[i]        = 0    ;
-         r_cust_const_qty[i]        = 0    ;
-         r_normal_sell_price[i]        = 0    ;
+/**********************************************************************/
+/*                       gr_px_prom_items.pc*/
+/**********************************************************************/
+/* Usage:gr_px_prom_items  <id/pwd>*/
+/*                                                                    */
+/*                    Created by ProcGr Generator                     */
+/**********************************************************************/
+#include <stdio.h>
+#include <string.h>
+
+#define OK 0
+#define ORAERR 9
+#define TRUE  1
+#define FETCH_SIZE 100
+#define FALSE 0
+#define REPORTNAME ""
+#define TITLE ""
+
+#define FORMAT "%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||\n"
+/* 預設在最後輸出error_msg，所以加上%s||，||是為了後續ctl的load_data方便讀取 */
+#define ERRORFORMAT "%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||%s||\n"
+#define SQLCA_INIT      1
+EXEC SQL INCLUDE SQLCA.H;
+#define ORACA_INIT      1
+EXEC SQL INCLUDE ORACA.H;
+
+EXEC SQL BEGIN DECLARE SECTION;
+
+VARCHAR oracle_id[30];
+VARCHAR error_msg[50];
+
+/* 為了讀取的屬性 */
+/* 由Excel複製過來的屬性的長度會被生成器 + 1，因為C語言中String需要 '\0' 作為字串結尾符號 */
+/* Oracle中 Date 與 DateTime會預設當成VARCHAR(30)來處理 */
+VARCHAR
+          r_work_date[100][30],
+          r_px_seq_no[100][32],
+          r_item_no[100][8],
+          r_px_prom_level[100][3],
+          r_px_prom_no[100][32],
+          r_px_prom_descr[100][102],
+          r_sell_begin_date[100][30],
+          r_sell_end_date[100][30],
+          r_active_sell_price[100][9],
+          r_sell_price2[100][9],
+          r_normal_sell_price[100][9],
+          r_promotion_no[100][6],
+          r_prom_type[100][3],
+          r_prom_level[100][3],
+          r_bonus_point[100][7],
+          r_block[100][3],
+          r_limit_qty[100][5],
+          r_prom_txt[100][32],
+          r_memo[100][32],
+          r_rule_type[100][3],
+          r_action_no[100][8],
+          r_module_code[100][4],
+          r_module_rule_type[100][3],
+          r_module_rule_value[100][6],
+          r_disc_action_no[100][8],
+          r_disc_rule_type[100][3],
+          r_disc_rule_value[100][7],
+          r_store_const_qty[100][8],
+          r_cust_const_qty[100][7],
+          r_day_limit_type[100][3],
+          r_upd_time[100][30],
+          r_c_item_no[100][12];
+
+
+/* 為了打印的屬性 */
+char
+       work_date[30],
+       px_seq_no[32],
+       item_no[8],
+       px_prom_level[3],
+       px_prom_no[32],
+       px_prom_descr[102],
+       sell_begin_date[30],
+       sell_end_date[30],
+       active_sell_price[9],
+       sell_price2[9],
+       normal_sell_price[9],
+       promotion_no[6],
+       prom_type[3],
+       prom_level[3],
+       bonus_point[7],
+       block[3],
+       limit_qty[5],
+       prom_txt[32],
+       memo[32],
+       rule_type[3],
+       action_no[8],
+       module_code[4],
+       module_rule_type[3],
+       module_rule_value[6],
+       disc_action_no[8],
+       disc_rule_type[3],
+       disc_rule_value[7],
+       store_const_qty[8],
+       cust_const_qty[7],
+       day_limit_type[3],
+       upd_time[30],
+       c_item_no[12];
+
+
+EXEC SQL END DECLARE SECTION;
+EXEC SQL WHENEVER SQLERROR GOTO error;
+
+/*--------------------------------------------------------------------*/
+/*                      main()                                        */
+/*--------------------------------------------------------------------*/
+FILE * fp;
+
+main(argc, argv)
+  int argc;
+  char *argv[];
+{
+  char str[132];
+
+  if (argc != 2) {
+    sprintf(str, "Usage: %s <id/pw>" , argv[0]);
+    prog_error(str);
+    ap_exit(1);
+  }
+
+  strcpy((char *)oracle_id.arr, argv[1]);
+  oracle_id.len = strlen((char *)oracle_id.arr);
+  EXEC SQL CONNECT :oracle_id;
+
+  fp = fopen ("invalid-data.txt", "w+");
+
+  process();
+
+  fclose(fp);
+
+  ap_exit(OK);
+
+error:
+  dbs_error("main");
+  ap_exit(ORAERR);
+} /* main() */
+/*--------------------------------------------------------------------*/
+/*                       process()                                    */
+/*--------------------------------------------------------------------*/
+
+int dataHasError = 0;
+
+process()
+{
+  while (read_data()) {
+      if(dataHasError){
+        log_error_to_error_txt();
+        update_px_prom_items_status_to_error();
+      } else {
+        print_success_px_prom_items();
+        update_px_prom_items_status_to_success();
+      }
+  }
+
+  return;
+}
+
+/*--------------------------------------------------------------------*/
+/*                      read_data()                                   */
+/*--------------------------------------------------------------------*/
+
+read_data()
+{
+  char str[100];
+  static int first_time = 1,
+             now        = 0,
+             this       = FETCH_SIZE,
+             in         = FETCH_SIZE;
+
+  dataHasError = 0;
+
+  if(first_time){
+    first_time = 0;
+    EXEC ORACLE OPTION( HOLD_CURSOR=YES );
+    EXEC SQL DECLARE DATA_1 CURSOR FOR
+    SELECT
+work_date        ,
+px_seq_no        ,
+item_no          ,
+px_prom_level    ,
+px_prom_no       ,
+px_prom_descr    ,
+sell_begin_date  ,
+sell_end_date    ,
+active_sell_price,
+sell_price2      ,
+normal_sell_price,
+promotion_no     ,
+prom_type        ,
+prom_level       ,
+bonus_point      ,
+block            ,
+limit_qty        ,
+prom_txt         ,
+memo             ,
+rule_type        ,
+action_no        ,
+module_code      ,
+module_rule_type ,
+module_rule_value,
+disc_action_no   ,
+disc_rule_type   ,
+disc_rule_value  ,
+store_const_qty  ,
+cust_const_qty   ,
+day_limit_type   ,
+upd_time         ,
+c_item_no        
+      FROM  PX_PROM_ITEMS
+    EXEC SQL OPEN DATA_1;
+  }
+
+  if(this == in){
+    if(this < FETCH_SIZE){
+      EXEC ORACLE OPTION( HOLD_CURSOR=NO );
+      EXEC SQL CLOSE DATA_1;
+      return(FALSE);
+    }
+
+    EXEC SQL FETCH DATA_1
+    INTO
+:r_work_date        ,
+:r_px_seq_no        ,
+:r_item_no          ,
+:r_px_prom_level    ,
+:r_px_prom_no       ,
+:r_px_prom_descr    ,
+:r_sell_begin_date  ,
+:r_sell_end_date    ,
+:r_active_sell_price,
+:r_sell_price2      ,
+:r_normal_sell_price,
+:r_promotion_no     ,
+:r_prom_type        ,
+:r_prom_level       ,
+:r_bonus_point      ,
+:r_block            ,
+:r_limit_qty        ,
+:r_prom_txt         ,
+:r_memo             ,
+:r_rule_type        ,
+:r_action_no        ,
+:r_module_code      ,
+:r_module_rule_type ,
+:r_module_rule_value,
+:r_disc_action_no   ,
+:r_disc_rule_type   ,
+:r_disc_rule_value  ,
+:r_store_const_qty  ,
+:r_cust_const_qty   ,
+:r_day_limit_type   ,
+:r_upd_time         ,
+:r_c_item_no        ;
+
+    this = sqlca.sqlerrd[2] - now;
+    now  = sqlca.sqlerrd[2];
+    in   = 0;
+    if(!this){
+      EXEC ORACLE OPTION( HOLD_CURSOR=NO );
+      EXEC SQL CLOSE DATA_1;
+      return(FALSE);
+    }
+  }
+  /* 讀出來的屬性放入打印屬性中 */
+set_null(&r_work_date[in]);
+strcpy(work_date,(char *)r_work_date[in].arr);
+
+set_null(&r_px_seq_no[in]);
+strcpy(px_seq_no,(char *)r_px_seq_no[in].arr);
+
+set_null(&r_item_no[in]);
+strcpy(item_no,(char *)r_item_no[in].arr);
+
+set_null(&r_px_prom_level[in]);
+strcpy(px_prom_level,(char *)r_px_prom_level[in].arr);
+
+set_null(&r_px_prom_no[in]);
+strcpy(px_prom_no,(char *)r_px_prom_no[in].arr);
+
+set_null(&r_px_prom_descr[in]);
+strcpy(px_prom_descr,(char *)r_px_prom_descr[in].arr);
+
+set_null(&r_sell_begin_date[in]);
+strcpy(sell_begin_date,(char *)r_sell_begin_date[in].arr);
+
+set_null(&r_sell_end_date[in]);
+strcpy(sell_end_date,(char *)r_sell_end_date[in].arr);
+
+set_null(&r_active_sell_price[in]);
+strcpy(active_sell_price,(char *)r_active_sell_price[in].arr);
+
+set_null(&r_sell_price2[in]);
+strcpy(sell_price2,(char *)r_sell_price2[in].arr);
+
+set_null(&r_normal_sell_price[in]);
+strcpy(normal_sell_price,(char *)r_normal_sell_price[in].arr);
+
+set_null(&r_promotion_no[in]);
+strcpy(promotion_no,(char *)r_promotion_no[in].arr);
+
+set_null(&r_prom_type[in]);
+strcpy(prom_type,(char *)r_prom_type[in].arr);
+
+set_null(&r_prom_level[in]);
+strcpy(prom_level,(char *)r_prom_level[in].arr);
+
+set_null(&r_bonus_point[in]);
+strcpy(bonus_point,(char *)r_bonus_point[in].arr);
+
+set_null(&r_block[in]);
+strcpy(block,(char *)r_block[in].arr);
+
+set_null(&r_limit_qty[in]);
+strcpy(limit_qty,(char *)r_limit_qty[in].arr);
+
+set_null(&r_prom_txt[in]);
+strcpy(prom_txt,(char *)r_prom_txt[in].arr);
+
+set_null(&r_memo[in]);
+strcpy(memo,(char *)r_memo[in].arr);
+
+set_null(&r_rule_type[in]);
+strcpy(rule_type,(char *)r_rule_type[in].arr);
+
+set_null(&r_action_no[in]);
+strcpy(action_no,(char *)r_action_no[in].arr);
+
+set_null(&r_module_code[in]);
+strcpy(module_code,(char *)r_module_code[in].arr);
+
+set_null(&r_module_rule_type[in]);
+strcpy(module_rule_type,(char *)r_module_rule_type[in].arr);
+
+set_null(&r_module_rule_value[in]);
+strcpy(module_rule_value,(char *)r_module_rule_value[in].arr);
+
+set_null(&r_disc_action_no[in]);
+strcpy(disc_action_no,(char *)r_disc_action_no[in].arr);
+
+set_null(&r_disc_rule_type[in]);
+strcpy(disc_rule_type,(char *)r_disc_rule_type[in].arr);
+
+set_null(&r_disc_rule_value[in]);
+strcpy(disc_rule_value,(char *)r_disc_rule_value[in].arr);
+
+set_null(&r_store_const_qty[in]);
+strcpy(store_const_qty,(char *)r_store_const_qty[in].arr);
+
+set_null(&r_cust_const_qty[in]);
+strcpy(cust_const_qty,(char *)r_cust_const_qty[in].arr);
+
+set_null(&r_day_limit_type[in]);
+strcpy(day_limit_type,(char *)r_day_limit_type[in].arr);
+
+set_null(&r_upd_time[in]);
+strcpy(upd_time,(char *)r_upd_time[in].arr);
+
+set_null(&r_c_item_no[in]);
+strcpy(c_item_no,(char *)r_c_item_no[in].arr);
+
+
+
+  /* 判斷屬性是否符合規格，不符合的話 dataHasError 設定為 1 */
+
+
+  in++;
+  return(TRUE);
+
+error:
+  dbs_error("read_data");
+  ap_exit(ORAERR);
+} /* read_data() */
+
+
+log_error_to_error_txt(){
+    fprintf(fp, ERRORFORMAT,
+work_date        ,
+px_seq_no        ,
+item_no          ,
+px_prom_level    ,
+px_prom_no       ,
+px_prom_descr    ,
+sell_begin_date  ,
+sell_end_date    ,
+active_sell_price,
+sell_price2      ,
+normal_sell_price,
+promotion_no     ,
+prom_type        ,
+prom_level       ,
+bonus_point      ,
+block            ,
+limit_qty        ,
+prom_txt         ,
+memo             ,
+rule_type        ,
+action_no        ,
+module_code      ,
+module_rule_type ,
+module_rule_value,
+disc_action_no   ,
+disc_rule_type   ,
+disc_rule_value  ,
+store_const_qty  ,
+cust_const_qty   ,
+day_limit_type   ,
+upd_time         ,
+c_item_no        ,
+                (char *)error_msg.arr
+            );
+    return;
+
+error:
+  dbs_error("log_error_to_error_txt");
+  ap_exit(ORAERR);
+} /* log_error_to_error_txt */
+
+update_px_prom_items_status_to_error(){
+
+  EXEC SQL
+  UPDATE    PX_PROM_ITEMS
+     SET    STATUS = 9, /* 9 異常 */
+            ERR_MSG = :error_msg
+   WHERE    CONDITION = :condition;
+
+
+   return;
+error:
+  dbs_error("update_px_prom_items_status_to_error");
+  ap_exit(ORAERR);
+} /* update_px_prom_items_status_to_error */
+
+print_success_px_prom_items(){
+    printf(FORMAT,
+work_date        ,
+px_seq_no        ,
+item_no          ,
+px_prom_level    ,
+px_prom_no       ,
+px_prom_descr    ,
+sell_begin_date  ,
+sell_end_date    ,
+active_sell_price,
+sell_price2      ,
+normal_sell_price,
+promotion_no     ,
+prom_type        ,
+prom_level       ,
+bonus_point      ,
+block            ,
+limit_qty        ,
+prom_txt         ,
+memo             ,
+rule_type        ,
+action_no        ,
+module_code      ,
+module_rule_type ,
+module_rule_value,
+disc_action_no   ,
+disc_rule_type   ,
+disc_rule_value  ,
+store_const_qty  ,
+cust_const_qty   ,
+day_limit_type   ,
+upd_time         ,
+c_item_no        
+          );
+     return;
+error:
+  dbs_error("print_success_px_prom_items");
+  ap_exit(ORAERR);
+}/* print_success_px_prom_items */
+
+update_px_prom_items_status_to_success(){
+
+  EXEC SQL
+  UPDATE    PX_PROM_ITEMS
+     SET    STATUS = 1, /* 1 成功 */
+            ERR_MSG = null
+   WHERE    condition=:condition;
+
+
+     return;
+error:
+  dbs_error("update_px_prom_items_status_to_success");
+  ap_exit(ORAERR);
+} /* update_px_prom_items_status_to_success */

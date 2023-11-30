@@ -1,3 +1,3 @@
-UPDATE ${javaJDBCUpdate.tableName}
+UPDATE ${marker.tableName}
 SET
-${javaJDBCUpdate.columnAndValueStatement};
+${marker.columnAndValueStatement};

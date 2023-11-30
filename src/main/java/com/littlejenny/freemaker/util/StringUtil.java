@@ -94,17 +94,20 @@ public class StringUtil {
             return prefix + item + suffix;
         }).collect(Collectors.toList());
     }
-    public static String toString(List<String> stringList){
+
+    public static String toString(List<String> stringList) {
         StringBuilder stringBuilder = new StringBuilder();
         for (String string : stringList) {
             stringBuilder.append(string);
         }
         return stringBuilder.toString();
     }
-    public static String removeLastWithLength(String string,Integer suffix){
-        return string.substring(0,string.length() - suffix);
+
+    public static String removeLastWithLength(String string, Integer suffix) {
+        return string.substring(0, string.length() - suffix);
     }
-    public static List<String> concat(List<String> source,List<String> asPart, String concator) {
+
+    public static List<String> concat(List<String> source, List<String> asPart, String concator) {
         if (source.size() != asPart.size()) throw new RuntimeException("兩個List長度不相同");
         List<String> newList = new ArrayList<>();
         for (int i = 0; i < source.size(); i++) {
@@ -112,14 +115,16 @@ public class StringUtil {
         }
         return newList;
     }
-    public static Integer longestLength(List<String> list){
+
+    public static Integer longestLength(List<String> list) {
         Integer longest = 0;
         for (String string : list) {
-            if(string.length() > longest) longest = string.length();
+            if (string.length() > longest) longest = string.length();
         }
         return longest;
     }
-    public static String fillSyntaxUntil(String string,Integer length,Character syntax){
+
+    public static String fillAfterSyntaxUntil(String string, Integer length, Character syntax) {
         StringBuilder stringBuilder = new StringBuilder(string);
         int count = length - string.length();
         for (int i = 0; i < count; i++) {
@@ -127,10 +132,20 @@ public class StringUtil {
         }
         return stringBuilder.toString();
     }
-    public static Integer upperCaseCount(String string){
+
+    public static String fillBeforeSyntaxUntil(String string, Integer length, Character syntax) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            stringBuilder.append(syntax);
+        }
+        stringBuilder.append(string);
+        return stringBuilder.toString();
+    }
+
+    public static Integer upperCaseCount(String string) {
         Integer count = 0;
         for (char c : string.toCharArray()) {
-            if(Character.isUpperCase(c)){
+            if (Character.isUpperCase(c)) {
                 count++;
             }
         }

@@ -1,32 +1,142 @@
 package com.littlejenny.freemaker;
 
 
-import com.littlejenny.freemaker.model.java.jdbc.JavaJDBCInsert;
+import com.littlejenny.freemaker.model.ExcelRow;
+import com.littlejenny.freemaker.model.handler.ProcGrOracleTypeHandler;
+import com.littlejenny.freemaker.model.freemarker.jdbc.java.JavaJDBCInsertMarker;
+import com.littlejenny.freemaker.util.SourceUtil;
+import com.littlejenny.freemaker.wrapper.ProcGrExcelRowListWrapper;
 import org.junit.jupiter.api.Test;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
+import java.util.List;
 
 public class JavaBaseTest {
     @Test
-    void splitLine(){
+    void splitLine() {
         String s = "   4  3  2 ";
         String[] split = s.split(" ");
         for (String string : split) {
             System.out.print(string.trim());
         }
     }
+
     @Test
-    void getModifier(){
-        for (Field field : JavaJDBCInsert.class.getDeclaredFields()) {
+    void getModifier() {
+        for (Field field : JavaJDBCInsertMarker.class.getDeclaredFields()) {
 
             System.out.println(field.getAnnotation(NotNull.class) == null);
         }
     }
 
     @Test
-    void getPropertyName(){
+    void typeChain() {
+        String success = "date";
+        String fail = "CC1";
+        ProcGrOracleTypeHandler procGrOracleTypeHandler = new ProcGrOracleTypeHandler();
 
+        System.out.println(procGrOracleTypeHandler.getReadType(success));
 
+        System.out.println(procGrOracleTypeHandler.getReadType(fail));
+    }
+
+    @Test
+    void getExcelRowFromOracle() {
+        String excelColumn = "PROMOTION_NO\tNUMBER(4,0)\n" +
+                "PROM_TYPE\tVARCHAR2(1)\n" +
+                "PROM_LEVEL\tNUMBER(1,0)\n" +
+                "BONUS_POINT\tNUMBER(5,0)\n" +
+                "BLOCK\tNUMBER(1,0)\n" +
+                "LIMIT_QTY\tNUMBER(3,0)\n" +
+                "PROM_TXT\tVARCHAR2(30)\n" +
+                "MEMO\tVARCHAR2(30)";
+        System.out.println(SourceUtil.getExcelRowFromOracle(excelColumn));
+    }
+
+    @Test
+    void split() {
+        String a = "a";
+        System.out.println(a.split(",").length);
+    }
+
+    @Test
+    void getReadProperty() {
+        String excelColumn = "PROMOTION_NO\tNUMBER(4,0)\n" +
+                "PROM_TYPE\tVARCHAR2(1)\n" +
+                "PROM_LEVEL\tNUMBER(1,0)\n" +
+                "BONUS_POINT\tNUMBER(5,0)\n" +
+                "BLOCK\tNUMBER(1,0)\n" +
+                "LIMIT_QTY\tNUMBER(3,0)\n" +
+                "PROM_TXT\tVARCHAR2(30)\n" +
+                "MEMO\tVARCHAR2(30)";
+        List<ExcelRow> excelRowFromOracle =
+                SourceUtil.getExcelRowFromOracle(excelColumn);
+        ProcGrExcelRowListWrapper procGrExcelRowListWrapper = ProcGrExcelRowListWrapper.of(excelRowFromOracle);
+        System.out.println(procGrExcelRowListWrapper.getReadProperty());
+    }
+
+    @Test
+    void getWriteProperty() {
+        String excelColumn = "PROMOTION_NO\tNUMBER(4,0)\n" +
+                "PROM_TYPE\tVARCHAR2(1)\n" +
+                "PROM_LEVEL\tNUMBER(1,0)\n" +
+                "BONUS_POINT\tNUMBER(5,0)\n" +
+                "BLOCK\tNUMBER(1,0)\n" +
+                "LIMIT_QTY\tNUMBER(3,0)\n" +
+                "PROM_TXT\tVARCHAR2(30)\n" +
+                "MEMO\tVARCHAR2(30)";
+        List<ExcelRow> excelRowFromOracle =
+                SourceUtil.getExcelRowFromOracle(excelColumn);
+        ProcGrExcelRowListWrapper procGrExcelRowListWrapper = ProcGrExcelRowListWrapper.of(excelRowFromOracle);
+        System.out.println(procGrExcelRowListWrapper.getWriteProperty());
+    }
+
+    @Test
+    void getSqlFetchStatement() {
+        String excelColumn = "PROMOTION_NO\tNUMBER(4,0)\n" +
+                "PROM_TYPE\tVARCHAR2(1)\n" +
+                "PROM_LEVEL\tNUMBER(1,0)\n" +
+                "BONUS_POINT\tNUMBER(5,0)\n" +
+                "BLOCK\tNUMBER(1,0)\n" +
+                "LIMIT_QTY\tNUMBER(3,0)\n" +
+                "PROM_TXT\tVARCHAR2(30)\n" +
+                "MEMO\tVARCHAR2(30)";
+        List<ExcelRow> excelRowFromOracle =
+                SourceUtil.getExcelRowFromOracle(excelColumn);
+        ProcGrExcelRowListWrapper procGrExcelRowListWrapper = ProcGrExcelRowListWrapper.of(excelRowFromOracle);
+        System.out.println(procGrExcelRowListWrapper.getSqlFetchStatement());
+    }
+
+    @Test
+    void getCopyValue() {
+        String excelColumn = "PROMOTION_NO\tNUMBER(4,0)\n" +
+                "PROM_TYPE\tVARCHAR2(1)\n" +
+                "PROM_LEVEL\tNUMBER(1,0)\n" +
+                "BONUS_POINT\tNUMBER(5,0)\n" +
+                "BLOCK\tNUMBER(1,0)\n" +
+                "LIMIT_QTY\tNUMBER(3,0)\n" +
+                "PROM_TXT\tVARCHAR2(30)\n" +
+                "MEMO\tVARCHAR2(30)";
+        List<ExcelRow> excelRowFromOracle =
+                SourceUtil.getExcelRowFromOracle(excelColumn);
+        ProcGrExcelRowListWrapper procGrExcelRowListWrapper = ProcGrExcelRowListWrapper.of(excelRowFromOracle);
+        System.out.println(procGrExcelRowListWrapper.getCopyValue());
+    }
+
+    @Test
+    void getPropertyNameList() {
+        String excelColumn = "PROMOTION_NO\tNUMBER(4,0)\n" +
+                "PROM_TYPE\tVARCHAR2(1)\n" +
+                "PROM_LEVEL\tNUMBER(1,0)\n" +
+                "BONUS_POINT\tNUMBER(5,0)\n" +
+                "BLOCK\tNUMBER(1,0)\n" +
+                "LIMIT_QTY\tNUMBER(3,0)\n" +
+                "PROM_TXT\tVARCHAR2(30)\n" +
+                "MEMO\tVARCHAR2(30)";
+        List<ExcelRow> excelRowFromOracle =
+                SourceUtil.getExcelRowFromOracle(excelColumn);
+        ProcGrExcelRowListWrapper procGrExcelRowListWrapper = ProcGrExcelRowListWrapper.of(excelRowFromOracle);
+        System.out.println(procGrExcelRowListWrapper.getPropertyNameList());
     }
 }

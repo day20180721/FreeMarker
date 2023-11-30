@@ -9,8 +9,6 @@
 /**********************************************************************/
 
 #include "stdio.h"
-EXEC SQL INCLUDE sqlca.h;
-EXEC SQL INCLUDE oraca.h;
 
 #define  FETCH_ALLOW  100
 #define  YES            1
@@ -31,6 +29,9 @@ VARCHAR  prom_type[2];
 VARCHAR  r_prom_type[100][2];
 
 EXEC SQL END DECLARE SECTION;
+
+EXEC SQL INCLUDE sqlca.h;
+EXEC SQL INCLUDE oraca.h;
 
 int  ${procDo.tableNameNotCamel}_count = 0;
 int  l_${procDo.tableNameNotCamel}_count = 0;
@@ -90,6 +91,7 @@ read_l_${procDo.tableNameNotCamel}()
 	     in       = FETCH_ALLOW;
 
   if (this_red == in) {
+    EXEC SQL COMMIT WORK;
     if (this_red < 100)
       return(FALSE); /* EOF */
 

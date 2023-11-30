@@ -1,9 +1,9 @@
 /**********************************************************************/
-/*      gr_${marker.tableNameLowerButNotCamel}.pc            */
+/*                       gr_${procDo.tableNameNotCamel}.pc            */
 /**********************************************************************/
-/* Usage:gr_${marker.tableNameLowerButNotCamel}  <id/pwd>    */
+/* Usage:gr_${procDo.tableNameNotCamel}  <id/pwd>                     */
 /*                                                                    */
-/*                    Created by ProcGr Generator                     */
+ /*                    Created by ProcGr Generator                    */
 /**********************************************************************/
 #include <stdio.h>
 #include <string.h>
@@ -13,10 +13,11 @@
 #define TRUE  1
 #define FETCH_SIZE 100
 #define FALSE 0
+#define REPORTNAME ""
+#define TITLE ""
 
-#define FORMAT "${marker.printFormat}\n"
-/* 預設在最後輸出error_msg，所以加上%s||，||是為了後續ctl的load_data方便讀取 */
-#define ERRORFORMAT "${marker.printFormat}%s||\n"
+#define FORMAT "%s||\n"
+#define ERRORFORMAT "%s||%s||\n"
 #define SQLCA_INIT      1
 EXEC SQL INCLUDE SQLCA.H;
 #define ORACA_INIT      1
@@ -25,18 +26,12 @@ EXEC SQL INCLUDE ORACA.H;
 EXEC SQL BEGIN DECLARE SECTION;
 
 VARCHAR oracle_id[30];
+
 VARCHAR error_msg[50];
 
-/* 為了讀取的屬性 */
-/* 由Excel複製過來的屬性的長度會被生成器 + 1，因為C語言中String需要 '\0' 作為字串結尾符號 */
-/* Oracle中 Date 與 DateTime會預設當成VARCHAR(30)來處理 */
-${marker.readProperty}
+VARCHAR r_prom_type[100][10];
 
-/* 為了打印的屬性 */
-${marker.writeProperty}
-
-/* 為了處理Fetch時Null的問題 */
-${marker.checkForNullProperty};
+char    prom_type[10];
 
 EXEC SQL END DECLARE SECTION;
 EXEC SQL WHENEVER SQLERROR GOTO error;
@@ -85,10 +80,10 @@ process()
   while (read_data()) {
       if(dataHasError){
         log_error_to_error_txt();
-        update_${marker.tableNameLowerButNotCamel}_status_to_error();
+        update_${procDo.tableNameNotCamel}_status_to_error();
       } else {
-        print_success_${marker.tableNameLowerButNotCamel}();
-        update_${marker.tableNameLowerButNotCamel}_status_to_success();
+        print_success_${procDo.tableNameNotCamel}();
+        update_${procDo.tableNameNotCamel}_status_to_success();
       }
   }
 
@@ -113,9 +108,8 @@ read_data()
     first_time = 0;
     EXEC ORACLE OPTION( HOLD_CURSOR=YES );
     EXEC SQL DECLARE DATA_1 CURSOR FOR
-    SELECT
-${marker.prettyPropertyNameList}
-      FROM  ${marker.tableNameUpperButNotCamel}
+    SELECT  A.PROM_TYPE
+      FROM  ${procDo.tableNameNotCamel}
     EXEC SQL OPEN DATA_1;
   }
 
@@ -127,8 +121,7 @@ ${marker.prettyPropertyNameList}
     }
 
     EXEC SQL FETCH DATA_1
-    INTO
-${marker.sqlFetchStatement};
+         INTO :r_prom_type;
 
     this = sqlca.sqlerrd[2] - now;
     now  = sqlca.sqlerrd[2];
@@ -139,11 +132,20 @@ ${marker.sqlFetchStatement};
       return(FALSE);
     }
   }
-  /* 讀出來的屬性放入打印屬性中 */
-${marker.copyValue}
 
-  /* 判斷屬性是否符合規格，不符合的話 dataHasError 設定為 1 */
-${marker.filterForErrorMsg}
+  /* G P S */
+  set_null(&r_prom_type[in]);
+  strcpy(prom_type, (char *)r_prom_type[in].arr);
+        
+  if (dataHasError != 1
+        && strcmp(prom_type,"G") != 0
+        && strcmp(prom_type,"P") != 0
+        && strcmp(prom_type,"S") != 0
+        ) {
+      dataHasError = 1;
+      strcpy((char *)error_msg.arr, "prom_type 不存在");
+      error_msg.len = strlen((char *)error_msg.arr);
+  }
 
   in++;
   return(TRUE);
@@ -156,8 +158,8 @@ error:
 
 log_error_to_error_txt(){
     fprintf(fp, ERRORFORMAT,
-${marker.prettyPropertyNameList},
-                (char *)error_msg.arr
+                prom_type,
+                 (char *)error_msg.arr
             );
     return;
 
@@ -166,42 +168,42 @@ error:
   ap_exit(ORAERR);
 } /* log_error_to_error_txt */
 
-update_${marker.tableNameLowerButNotCamel}_status_to_error(){
+update_${procDo.tableNameNotCamel}_status_to_error(){
 
   EXEC SQL
-  UPDATE    ${marker.tableNameUpperButNotCamel}
+  UPDATE    ${procDo.tableNameNotCamel}
      SET    STATUS = 9, /* 9 異常 */
             ERR_MSG = :error_msg
-   WHERE    CONDITION = :condition;
-
+   WHERE
+            ;
 
    return;
 error:
-  dbs_error("update_${marker.tableNameLowerButNotCamel}_status_to_error");
+  dbs_error("update_${procDo.tableNameNotCamel}_status_to_error");
   ap_exit(ORAERR);
-} /* update_${marker.tableNameLowerButNotCamel}_status_to_error */
+} /* update_${procDo.tableNameNotCamel}_status_to_error */
 
-print_success_${marker.tableNameLowerButNotCamel}(){
+print_success_${procDo.tableNameNotCamel}(){
     printf(FORMAT,
-${marker.prettyPropertyNameList}
+                  prom_type
           );
      return;
 error:
-  dbs_error("print_success_${marker.tableNameLowerButNotCamel}");
+  dbs_error("print_success_${procDo.tableNameNotCamel}");
   ap_exit(ORAERR);
-}/* print_success_${marker.tableNameLowerButNotCamel} */
+}/* print_success_${procDo.tableNameNotCamel} */
 
-update_${marker.tableNameLowerButNotCamel}_status_to_success(){
+update_${procDo.tableNameNotCamel}_status_to_success(){
 
   EXEC SQL
-  UPDATE    ${marker.tableNameUpperButNotCamel}
+  UPDATE    ${procDo.tableNameNotCamel}
      SET    STATUS = 1, /* 1 成功 */
             ERR_MSG = null
-   WHERE    condition=:condition;
-
+   WHERE
+            ;
 
      return;
 error:
-  dbs_error("update_${marker.tableNameLowerButNotCamel}_status_to_success");
+  dbs_error("update_${procDo.tableNameNotCamel}_status_to_success");
   ap_exit(ORAERR);
-} /* update_${marker.tableNameLowerButNotCamel}_status_to_success */
+} /* update_${procDo.tableNameNotCamel}_status_to_success */

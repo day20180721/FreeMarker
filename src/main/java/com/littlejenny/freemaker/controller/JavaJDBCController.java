@@ -1,11 +1,11 @@
 package com.littlejenny.freemaker.controller;
 
-import com.littlejenny.freemaker.model.java.jdbc.JavaJDBCInsert;
-import com.littlejenny.freemaker.model.java.jdbc.JavaJDBCUpdate;
-import com.littlejenny.freemaker.model.java.jdbc.JavaJDBCMapSqlParameterSource;
+import com.littlejenny.freemaker.model.freemarker.jdbc.java.JavaJDBCInsertMarker;
+import com.littlejenny.freemaker.model.freemarker.jdbc.java.JavaJDBCMapSqlParameterSource;
+import com.littlejenny.freemaker.model.freemarker.jdbc.java.JavaJDBCUpdateMarker;
+import com.littlejenny.freemaker.model.freemarker.jdbc.java.JavaJDBCMapSqlParameterSourceMarker;
 import com.littlejenny.freemaker.util.FreeMarkerUtil;
 import com.littlejenny.freemaker.util.SourceUtil;
-import com.littlejenny.freemaker.util.StringUtil;
 import com.littlejenny.freemaker.wrapper.FieldNameListWrapper;
 import freemarker.template.TemplateException;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,20 +13,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("${target.java.jdbc}")
 public class JavaJDBCController {
-
     @ResponseBody
-    @GetMapping("${function.insert}" + "${source.java.class_column}")
+    @GetMapping("${function.insert}" + "${from.java.class.column}")
     public String insertFromClassColumn(String classColumn, String tableName) throws TemplateException, IOException {
         // workDate
         List<String> fieldNameList = SourceUtil.getFieldNameListFromClassColumn(classColumn);
@@ -34,7 +30,7 @@ public class JavaJDBCController {
     }
 
     @ResponseBody
-    @GetMapping("${function.insert}" + "${source.java.class}")
+    @GetMapping("${function.insert}" + "${from.java.class}")
     public String insertFromClass(String classPath, String tableName) throws TemplateException, IOException, ClassNotFoundException {
         //workDate
         List<String> fieldNameList = SourceUtil.getFieldNameListFromClass(classPath);
@@ -42,35 +38,35 @@ public class JavaJDBCController {
     }
 
     @ResponseBody
-    @GetMapping("${function.insert}" + "${source.excel.column}")
+    @GetMapping("${function.insert}" + "${from.excel.column}")
     public String insertFromExcelColumn(String excelColumn, String tableName) throws TemplateException, IOException {
         // WORK_DATE
         List<String> fieldNameList = SourceUtil.getFieldNameListFromExcelColumn(excelColumn);
-        FieldNameListWrapper columnWrapper = new FieldNameListWrapper(fieldNameList);
+        FieldNameListWrapper columnWrapper = FieldNameListWrapper.of(fieldNameList);
         String sqlInsertColumnStatement = columnWrapper.toUpperCase().addPreAndSuffix("", ",\n").removeLengthFromLastIndex(",\n".length()).toListString();
 
-        FieldNameListWrapper valueWrapper = new FieldNameListWrapper(fieldNameList);
+        FieldNameListWrapper valueWrapper = FieldNameListWrapper.of(fieldNameList);
         String sqlInsertValueStatement = valueWrapper.toLowerCase().addPreAndSuffix(":", ",\n").removeLengthFromLastIndex(",\n".length()).toListString();
 
-        JavaJDBCInsert javaJDBCInsert = new JavaJDBCInsert(tableName, sqlInsertColumnStatement, sqlInsertValueStatement);
-        Map<String, Object> param = FreeMarkerUtil.param().put("javaJDBCInsert", javaJDBCInsert).build();
+        JavaJDBCInsertMarker marker = new JavaJDBCInsertMarker(tableName, sqlInsertColumnStatement, sqlInsertValueStatement);
+        Map<String, Object> param = FreeMarkerUtil.param().put("marker", marker).build();
         return FreeMarkerUtil.getResult(param, "java-jdbc-Insert");
     }
 
     private String insert(List<String> fieldNameList, String tableName) throws TemplateException, IOException {
-        FieldNameListWrapper columnWrapper = new FieldNameListWrapper(fieldNameList);
+        FieldNameListWrapper columnWrapper = FieldNameListWrapper.of(fieldNameList);
         String sqlInsertColumnStatement = columnWrapper.toNotCamel().toUpperCase().addPreAndSuffix("", ",\n").removeLengthFromLastIndex(",\n".length()).toListString();
 
-        FieldNameListWrapper valueWrapper = new FieldNameListWrapper(fieldNameList);
+        FieldNameListWrapper valueWrapper = FieldNameListWrapper.of(fieldNameList);
         String sqlInsertValueStatement = valueWrapper.toNotCamel().addPreAndSuffix(":", ",\n").removeLengthFromLastIndex(",\n".length()).toListString();
 
-        JavaJDBCInsert javaJDBCInsert = new JavaJDBCInsert(tableName, sqlInsertColumnStatement, sqlInsertValueStatement);
-        Map<String, Object> param = FreeMarkerUtil.param().put("javaJDBCInsert", javaJDBCInsert).build();
+        JavaJDBCInsertMarker marker = new JavaJDBCInsertMarker(tableName, sqlInsertColumnStatement, sqlInsertValueStatement);
+        Map<String, Object> param = FreeMarkerUtil.param().put("marker", marker).build();
         return FreeMarkerUtil.getResult(param, "java-jdbc-Insert");
     }
 
     @ResponseBody
-    @GetMapping("${function.update}" + "${source.java.class_column}")
+    @GetMapping("${function.update}" + "${from.java.class.column}")
     public String updateFromClassColumn(String classColumn, String tableName) throws TemplateException, IOException {
         // workDate
         List<String> fieldNameList = SourceUtil.getFieldNameListFromClassColumn(classColumn);
@@ -78,7 +74,7 @@ public class JavaJDBCController {
     }
 
     @ResponseBody
-    @GetMapping("${function.update}" + "${source.java.class}")
+    @GetMapping("${function.update}" + "${from.java.class}")
     public String updateFromClass(String classPath, String tableName) throws TemplateException, IOException, ClassNotFoundException {
         // workDate
         List<String> fieldNameList = SourceUtil.getFieldNameListFromClass(classPath);
@@ -86,16 +82,16 @@ public class JavaJDBCController {
     }
 
     @ResponseBody
-    @GetMapping("${function.update}" + "${source.excel.column}")
+    @GetMapping("${function.update}" + "${from.excel.column}")
     public String updateFromExcelColumn(String excelColumn, String tableName) throws TemplateException, IOException {
         // WORK_Date
         List<String> fieldNameList = SourceUtil.getFieldNameListFromExcelColumn(excelColumn);
 
-        FieldNameListWrapper valueWrapper = new FieldNameListWrapper(fieldNameList);
+        FieldNameListWrapper valueWrapper = FieldNameListWrapper.of(fieldNameList);
         //WORK_Date -> :work_date
         List<String> valueList = valueWrapper.toLowerCase().expand().addPreAndSuffix(":", "").build();
 
-        FieldNameListWrapper columnWrapper = new FieldNameListWrapper(fieldNameList);
+        FieldNameListWrapper columnWrapper = FieldNameListWrapper.of(fieldNameList);
         //WORK_Date  -> WORK_DATE = :work_date -> WORK_DATE = :work_date,\n
         String columnAndValueStatement = columnWrapper
                 .toUpperCase()
@@ -105,19 +101,19 @@ public class JavaJDBCController {
                 .removeLengthFromLastIndex(",\n".length())
                 .toListString();
 
-        JavaJDBCUpdate javaJDBCUpdate = new JavaJDBCUpdate(tableName, columnAndValueStatement);
+        JavaJDBCUpdateMarker marker = new JavaJDBCUpdateMarker(tableName, columnAndValueStatement);
 
-        Map<String, Object> param = FreeMarkerUtil.param().put("javaJDBCUpdate", javaJDBCUpdate).build();
+        Map<String, Object> param = FreeMarkerUtil.param().put("marker", marker).build();
 
         return FreeMarkerUtil.getResult(param, "java-jdbc-update");
     }
 
     private String update(List<String> fieldNameList, String tableName) throws TemplateException, IOException {
-        FieldNameListWrapper valueWrapper = new FieldNameListWrapper(fieldNameList);
+        FieldNameListWrapper valueWrapper = FieldNameListWrapper.of(fieldNameList);
         //work_date -> :work_date
         List<String> valueList = valueWrapper.toNotCamel().expand().addPreAndSuffix(":", "").build();
 
-        FieldNameListWrapper columnWrapper = new FieldNameListWrapper(fieldNameList);
+        FieldNameListWrapper columnWrapper = FieldNameListWrapper.of(fieldNameList);
         //work_date -> WORK_DATE -> WORK_DATE = :work_date -> WORK_DATE = :work_date,\n
         String columnAndValueStatement = columnWrapper.
                 toNotCamel()
@@ -128,33 +124,67 @@ public class JavaJDBCController {
                 .removeLengthFromLastIndex(",\n".length())
                 .toListString();
 
-        JavaJDBCUpdate javaJDBCUpdate = new JavaJDBCUpdate(tableName, columnAndValueStatement);
+        JavaJDBCUpdateMarker marker = new JavaJDBCUpdateMarker(tableName, columnAndValueStatement);
 
-        Map<String, Object> param = FreeMarkerUtil.param().put("javaJDBCUpdate", javaJDBCUpdate).build();
+        Map<String, Object> param = FreeMarkerUtil.param().put("marker", marker).build();
 
         return FreeMarkerUtil.getResult(param, "java-jdbc-update");
     }
 
     @ResponseBody
-    @GetMapping("${function.map_sql_param_src}" + "${source.java.class}")
+    @GetMapping("${function.map_sql_param_src}" + "${from.java.class}")
     public String mapSqlParamSrcFromClass(String classPath) throws ClassNotFoundException, TemplateException, IOException {
         Class<?> clazz = Class.forName(classPath);
-        List<JavaJDBCMapSqlParameterSource> itemList = getSqlParameterSourcesList(clazz);
-        Map<String, Object> param = FreeMarkerUtil.param().put("itemList", itemList).put("parentName", clazz.getSimpleName()).build();
+        List<String> fieldNameList = SourceUtil.getFieldNameListFromClass(classPath);
+        List<JavaJDBCMapSqlParameterSource> paramList = getSqlParameterSourcesListFromClass(fieldNameList);
+        JavaJDBCMapSqlParameterSourceMarker marker = new JavaJDBCMapSqlParameterSourceMarker(paramList, clazz.getSimpleName());
+        Map<String, Object> param = FreeMarkerUtil.param().put("marker", marker).build();
         return FreeMarkerUtil.getResult(param, "java-jdbc-MapSqlParameterSource");
     }
 
-    private List<JavaJDBCMapSqlParameterSource> getSqlParameterSourcesList(Class<?> clazz) {
-        Field[] fields = clazz.getDeclaredFields();
-        return Arrays.stream(fields).map(field -> {
-            String camel = field.getName();
-            String notCamel = StringUtil.toNotCamel(camel);
-            Boolean isNullable = isFieldNullable(field);
-            return new JavaJDBCMapSqlParameterSource(camel, notCamel, isNullable);
-        }).collect(Collectors.toList());
+    @ResponseBody
+    @GetMapping("${function.map_sql_param_src}" + "${from.java.class.column}")
+    public String mapSqlParamSrcFromClassColumn(String classColumn, String tableName) throws ClassNotFoundException, TemplateException, IOException {
+        List<String> fieldNameList = SourceUtil.getFieldNameListFromClassColumn(classColumn);
+        List<JavaJDBCMapSqlParameterSource> paramList = getSqlParameterSourcesListFromClass(fieldNameList);
+        JavaJDBCMapSqlParameterSourceMarker marker = new JavaJDBCMapSqlParameterSourceMarker(paramList, tableName);
+        Map<String, Object> param = FreeMarkerUtil.param().put("marker", marker).build();
+        return FreeMarkerUtil.getResult(param, "java-jdbc-MapSqlParameterSource");
     }
 
-    private boolean isFieldNullable(Field field) {
-        return field.getAnnotation(NotNull.class) == null;
+    @ResponseBody
+    @GetMapping("${function.map_sql_param_src}" + "${from.excel.column}")
+    public String mapSqlParamSrcFromExcelColumn(String excelColumn, String tableName) throws ClassNotFoundException, TemplateException, IOException {
+        List<String> fieldNameList = SourceUtil.getFieldNameListFromExcelColumn(excelColumn);
+        List<JavaJDBCMapSqlParameterSource> paramList = getSqlParameterSourcesListFromExcelColumn(fieldNameList);
+        JavaJDBCMapSqlParameterSourceMarker marker = new JavaJDBCMapSqlParameterSourceMarker(paramList, tableName);
+        Map<String, Object> param = FreeMarkerUtil.param().put("marker", marker).build();
+        return FreeMarkerUtil.getResult(param, "java-jdbc-MapSqlParameterSource");
+    }
+
+    private List<JavaJDBCMapSqlParameterSource> getSqlParameterSourcesListFromClass(List<String> fieldNameList) {
+        List<JavaJDBCMapSqlParameterSource> paramList = new ArrayList<>();
+        FieldNameListWrapper fieldNameListWrapper = FieldNameListWrapper.of(fieldNameList);
+        List<String> notCamel = fieldNameListWrapper.toNotCamel().build();
+        int fieldLength = fieldNameList.size();
+        for (int i = 0; i < fieldLength; i++) {
+            JavaJDBCMapSqlParameterSource param = new JavaJDBCMapSqlParameterSource(fieldNameList.get(i), notCamel.get(i));
+            paramList.add(param);
+        }
+        return paramList;
+    }
+
+    private List<JavaJDBCMapSqlParameterSource> getSqlParameterSourcesListFromExcelColumn(List<String> fieldNameList) {
+        List<JavaJDBCMapSqlParameterSource> paramList = new ArrayList<>();
+        FieldNameListWrapper camelWrapper = FieldNameListWrapper.of(fieldNameList);
+        List<String> camel = camelWrapper.toLowerCase().toCamel().build();
+        FieldNameListWrapper notCamelWrapper = FieldNameListWrapper.of(fieldNameList);
+        List<String> notCamel = notCamelWrapper.toLowerCase().build();
+        int fieldLength = fieldNameList.size();
+        for (int i = 0; i < fieldLength; i++) {
+            JavaJDBCMapSqlParameterSource param = new JavaJDBCMapSqlParameterSource(camel.get(i), notCamel.get(i));
+            paramList.add(param);
+        }
+        return paramList;
     }
 }

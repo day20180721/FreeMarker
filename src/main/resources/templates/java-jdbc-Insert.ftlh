@@ -1,8 +1,8 @@
-INSERT INTO ${javaJDBCInsert.tableName}
+INSERT INTO ${marker.tableName}
 (
-${javaJDBCInsert.columnStatement}
+${marker.columnStatement}
 )
 VALUES
 (
-${javaJDBCInsert.valueStatement}
+${marker.valueStatement}
 );

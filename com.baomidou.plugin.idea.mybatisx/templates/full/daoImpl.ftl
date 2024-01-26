@@ -29,32 +29,32 @@ public class ${daoImpl.fileName} implements ${daoInterface.fileName}   {
     NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
-    public List<${dto.fileName}> list(){
-        List<${dto.fileName}> list = jdbcTemplate.query(listSql(), new BeanPropertyRowMapper<>(${dto.fileName}.class));
+    public List<${dto.fileName}> select(){
+        List<${dto.fileName}> list = jdbcTemplate.query(selectSql(), new BeanPropertyRowMapper<>(${dto.fileName}.class));
         log.info("取得 " + list.size() + " 筆 ${dto.fileName}");
         return list;
     }
-    private String listSql(){
-        return "";
+    private String selectSql(){
+        return "select * from ${tableClass.tableName}";
     }
 
     @Override
-    public int saveBatch(List<${dto.fileName}> ${dto.fileName?uncap_first}List){
-        MapSqlParameterSource[] mapArray = getSaveBatchMapSqlParameterSourceList(${dto.fileName?uncap_first}List);
-        int[] result = jdbcTemplate.batchUpdate(saveBatchSql(), mapArray);
+    public int insertBatch(List<${dto.fileName}> ${dto.fileName?uncap_first}List){
+        MapSqlParameterSource[] mapArray = getInsertBatchMapSqlParameterSourceList(${dto.fileName?uncap_first}List);
+        int[] result = jdbcTemplate.batchUpdate(insertBatchSql(), mapArray);
         log.info("新增 " + result.length + " 筆 ${dto.fileName}");
         return result.length;
     }
-    private MapSqlParameterSource[] getSaveBatchMapSqlParameterSourceList(List<${dto.fileName}> ${dto.fileName?uncap_first}List) {
-        return ${dto.fileName?uncap_first}List.stream().map(this::getSaveBatchMapSqlParameterSource).collect(Collectors.toList()).toArray(new MapSqlParameterSource[0]);
+    private MapSqlParameterSource[] getInsertBatchMapSqlParameterSourceList(List<${dto.fileName}> ${dto.fileName?uncap_first}List) {
+        return ${dto.fileName?uncap_first}List.stream().map(this::getInsertBatchMapSqlParameterSource).collect(Collectors.toList()).toArray(new MapSqlParameterSource[0]);
     }
-    private MapSqlParameterSource getSaveBatchMapSqlParameterSource(${dto.fileName} ${dto.fileName?uncap_first}) {
+    private MapSqlParameterSource getInsertBatchMapSqlParameterSource(${dto.fileName} ${dto.fileName?uncap_first}) {
         MapSqlParameterSource map = new MapSqlParameterSource();
         return map;
     }
 
-    private String saveBatchSql(){
-        return "";
+    private String insertBatchSql(){
+        return "insert into ${tableClass.tableName} () values()";
     }
 
     @Override
@@ -72,7 +72,7 @@ public class ${daoImpl.fileName} implements ${daoInterface.fileName}   {
         return map;
     }
     private String updateBatchSql(){
-        return "";
+        return "update ${tableClass.tableName} set where";
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ${daoImpl.fileName} implements ${daoInterface.fileName}   {
         return deleteCount;
     }
     private String deleteSql(){
-        return "";
+        return "delete ${tableClass.tableName} where ";
     }
 
     @Override
@@ -92,6 +92,6 @@ public class ${daoImpl.fileName} implements ${daoInterface.fileName}   {
         return deleteCount.length;
     }
     private String deleteBatchSql(){
-        return "";
+        return "delete ${tableClass.tableName} where";
     }
 }

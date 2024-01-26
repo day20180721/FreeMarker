@@ -12,8 +12,8 @@ import java.util.List;
 
 public interface ${daoInterface.fileName} {
 
-    List<${dto.fileName}> list();
-    int saveBatch(List<${dto.fileName}> ${dto.fileName?uncap_first}List);
+    List<${dto.fileName}> select();
+    int insertBatch(List<${dto.fileName}> ${dto.fileName?uncap_first}List);
     int updateBatch(List<${dto.fileName}> ${dto.fileName?uncap_first}List);
     int delete();
     int deleteBatch();

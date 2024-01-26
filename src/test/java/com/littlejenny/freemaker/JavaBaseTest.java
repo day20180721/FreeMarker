@@ -2,14 +2,17 @@ package com.littlejenny.freemaker;
 
 
 import com.littlejenny.freemaker.model.ExcelRow;
-import com.littlejenny.freemaker.model.handler.ProcGrOracleTypeHandler;
+import com.littlejenny.freemaker.model.proc.handler.oracle.OracleToProcGrTypeHandler;
 import com.littlejenny.freemaker.model.freemarker.jdbc.java.JavaJDBCInsertMarker;
+import com.littlejenny.freemaker.util.DateUtil;
 import com.littlejenny.freemaker.util.SourceUtil;
 import com.littlejenny.freemaker.wrapper.ProcGrExcelRowListWrapper;
 import org.junit.jupiter.api.Test;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JavaBaseTest {
@@ -34,11 +37,11 @@ public class JavaBaseTest {
     void typeChain() {
         String success = "date";
         String fail = "CC1";
-        ProcGrOracleTypeHandler procGrOracleTypeHandler = new ProcGrOracleTypeHandler();
+        OracleToProcGrTypeHandler oracleToProcGrTypeHandler = new OracleToProcGrTypeHandler();
 
-        System.out.println(procGrOracleTypeHandler.getReadType(success));
+        System.out.println(oracleToProcGrTypeHandler.getReadType(success));
 
-        System.out.println(procGrOracleTypeHandler.getReadType(fail));
+        System.out.println(oracleToProcGrTypeHandler.getReadType(fail));
     }
 
     @Test
@@ -138,5 +141,27 @@ public class JavaBaseTest {
                 SourceUtil.getExcelRowFromOracle(excelColumn);
         ProcGrExcelRowListWrapper procGrExcelRowListWrapper = ProcGrExcelRowListWrapper.of(excelRowFromOracle);
         System.out.println(procGrExcelRowListWrapper.getPropertyNameList());
+    }
+
+    @Test
+    void startDate() {
+        LocalDate startDate = DateUtil.getDateFromString("2022-01-01");
+        List<String> startDateList = new ArrayList<>();
+        for (int i = 0; i < 23; i++) {
+            startDateList.add(DateUtil.getStringFromDate(startDate));
+            startDate = startDate.plusMonths(1);
+        }
+        System.out.println(startDateList);
+    }
+    @Test
+    void endDate() {
+        LocalDate endDate = DateUtil.getDateFromString("2022-02-01");
+        List<String> endDateList = new ArrayList<>();
+        for (int i = 0; i < 22; i++) {
+            endDateList.add(DateUtil.getStringFromDate(endDate));
+            endDate = endDate.plusMonths(1);
+        }
+        endDateList.add("2023-11-28");
+        System.out.println(endDateList);
     }
 }

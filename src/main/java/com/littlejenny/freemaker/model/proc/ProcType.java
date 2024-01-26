@@ -1,4 +1,4 @@
-package com.littlejenny.freemaker.model;
+package com.littlejenny.freemaker.model.proc;
 
 /**
  * @author 王洪棟 - Lin

@@ -1,21 +1,19 @@
-package com.littlejenny.freemaker.model.handler;
+package com.littlejenny.freemaker.model.proc.handler.oracle;
 
-import com.littlejenny.freemaker.model.ProcType;
-import com.littlejenny.freemaker.model.chain.TypeChain;
+import com.littlejenny.freemaker.model.proc.ProcType;
+import com.littlejenny.freemaker.model.proc.chain.TypeChain;
+import com.littlejenny.freemaker.model.proc.handler.TypeHandler;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
+ * TypeChain的實例化，用於判斷某個資料庫的型態是否能夠判斷
+ *
  * @author 王洪棟 - Lin
  * @created date 2023/11/20
  */
-public class ProcGrOracleTypeHandler {
-
-    private final TypeChain chainHead;
-    private final List<TypeChain> chainList;
-
-    public ProcGrOracleTypeHandler() {
+public class OracleToProcGrTypeHandler extends TypeHandler {
+    public OracleToProcGrTypeHandler() {
         TypeChain oracleDateTimeType = new OracleDateTimeType(null);
         TypeChain oracleDateType = new OracleDateType(oracleDateTimeType);
         TypeChain oracleNumberType = new OracleNumberType(oracleDateType);
@@ -30,31 +28,10 @@ public class ProcGrOracleTypeHandler {
         chainList.add(oracleVarchar2Type);
     }
 
-    public boolean canHandle(String type) {
-        for (TypeChain chain : chainList) {
-            if (chain.canHandle(type)) return true;
-        }
-        return false;
-    }
-
-    public String getReadType(String type) {
-        return chainHead.getReadType(type);
-    }
-
-    public String getWriteType(String type) {
-        return chainHead.getWriteType(type);
-    }
-    public String getWriteFormatSyntax(String type){
-        return chainHead.getWriteFormatSyntax(type);
-    }
-    public int length(String type) {
-        return chainHead.length(type);
-    }
-
     private class OracleDateType extends TypeChain {
 
         public OracleDateType(TypeChain next) {
-            super(next, ProcType.VARCHAR.name(), ProcType.CHAR.name().toLowerCase(),'s');
+            super(next, ProcType.VARCHAR.name(), ProcType.CHAR.name().toLowerCase(), 's');
         }
 
         @Override
@@ -74,7 +51,7 @@ public class ProcGrOracleTypeHandler {
 
     private class OracleVarchar2Type extends TypeChain {
         public OracleVarchar2Type(TypeChain next) {
-            super(next, ProcType.VARCHAR.name(), ProcType.CHAR.name().toLowerCase(),'s');
+            super(next, ProcType.VARCHAR.name(), ProcType.CHAR.name().toLowerCase(), 's');
         }
 
         @Override
@@ -87,7 +64,7 @@ public class ProcGrOracleTypeHandler {
     private class OracleNumberType extends TypeChain {
 
         public OracleNumberType(TypeChain next) {
-            super(next, ProcType.VARCHAR.name(), ProcType.CHAR.name().toLowerCase(),'s');
+            super(next, ProcType.VARCHAR.name(), ProcType.CHAR.name().toLowerCase(), 's');
         }
 
         @Override
@@ -100,13 +77,14 @@ public class ProcGrOracleTypeHandler {
     private class OracleDateTimeType extends TypeChain {
 
         public OracleDateTimeType(TypeChain next) {
-            super(next, ProcType.VARCHAR.name(), ProcType.CHAR.name().toLowerCase(),'s');
+            super(next, ProcType.VARCHAR.name(), ProcType.CHAR.name().toLowerCase(), 's');
         }
 
         @Override
         public boolean canHandle(String type) {
             return type.toLowerCase().contains("datetime");
         }
+
         @Override
         public Integer length(String type) {
             if (!canHandle(type)) {

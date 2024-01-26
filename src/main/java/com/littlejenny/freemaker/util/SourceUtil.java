@@ -1,7 +1,7 @@
 package com.littlejenny.freemaker.util;
 
 import com.littlejenny.freemaker.model.ExcelRow;
-import com.littlejenny.freemaker.model.handler.ProcGrOracleTypeHandler;
+import com.littlejenny.freemaker.model.proc.handler.oracle.OracleToProcGrTypeHandler;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -83,7 +83,7 @@ public class SourceUtil {
         WORK_DATE	DATE
         DATA_ID	NUMBER(10)
     */
-    private static final ProcGrOracleTypeHandler PROC_GR_ORACLE_TYPE_CHAIN = new ProcGrOracleTypeHandler();
+    private static final OracleToProcGrTypeHandler PROC_GR_ORACLE_TYPE_CHAIN = new OracleToProcGrTypeHandler();
 
     public static List<ExcelRow> getExcelRowFromOracle(String excelColumn) {
         String[] lineArray = excelColumn.toUpperCase().split("\n");

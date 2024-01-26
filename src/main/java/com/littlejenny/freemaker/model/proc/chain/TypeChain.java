@@ -1,18 +1,24 @@
-package com.littlejenny.freemaker.model.chain;
-
-import com.littlejenny.freemaker.model.ProcType;
-import lombok.Data;
+package com.littlejenny.freemaker.model.proc.chain;
 
 /**
+ * 提供資料庫型態後，可以取得Proc中讀取及寫入的型態，我用於GR DO
  * @author 王洪棟 - Lin
  * @created date 2023/11/20
  */
 public abstract class TypeChain {
     protected TypeChain next;
+    /**
+     * Proc用來讀的型態
+     */
     protected String readProcType;
+    /**
+     * Proc用來寫的型態
+     */
     protected String writeProcType;
     protected char writeFormatSyntax;
+    public TypeChain(){
 
+    }
     public TypeChain(TypeChain next, String readProcType, String writeProcType, char writeFormatSyntax) {
         this.next = next;
         this.readProcType = readProcType;
@@ -20,6 +26,11 @@ public abstract class TypeChain {
         this.writeFormatSyntax = writeFormatSyntax;
     }
 
+    /**
+     *
+     * @param type 資料庫 Data type
+     * @return
+     */
     public boolean canHandle(String type) {
         return true;
     }
@@ -40,7 +51,13 @@ public abstract class TypeChain {
         return writeProcType;
     }
 
-
+    public String getWriteFormatSyntax(String type) {
+        if (!canHandle(type)) {
+            if (next == null) return null;
+            return next.getWriteFormatSyntax(type);
+        }
+        return "%" + writeFormatSyntax + "||";
+    }
     public Integer length(String type) {
         if (!canHandle(type)) {
             if (next == null) return null;
@@ -58,13 +75,5 @@ public abstract class TypeChain {
         }
         //+2 For '\0'
         return propertyLength + 2;
-    }
-
-    public String getWriteFormatSyntax(String type) {
-        if (!canHandle(type)) {
-            if (next == null) return null;
-            return next.getWriteFormatSyntax(type);
-        }
-        return "%" + writeFormatSyntax + "||";
     }
 }

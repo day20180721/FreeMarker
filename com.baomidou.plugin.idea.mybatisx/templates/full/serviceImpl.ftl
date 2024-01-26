@@ -24,11 +24,11 @@ public class ${serviceImpl.fileName} implements ${serviceInterface.fileName}   {
     private ${daoInterface.fileName} ${daoInterface.fileName?uncap_first};
     @Override
     public List<${dto.fileName}> list(){
-        return ${daoInterface.fileName?uncap_first}.list();
+        return ${daoInterface.fileName?uncap_first}.select();
     }
     @Override
     public int saveBatch(List<${dto.fileName}> ${dto.fileName?uncap_first}List){
-        return ${daoInterface.fileName?uncap_first}.saveBatch(${dto.fileName?uncap_first}List);
+        return ${daoInterface.fileName?uncap_first}.insertBatch(${dto.fileName?uncap_first}List);
     }
     @Override
     public int updateBatch(List<${dto.fileName}> ${dto.fileName?uncap_first}List){
